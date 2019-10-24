@@ -4,7 +4,7 @@ Back-end da aplicação do Bootcamp Gostack | Rocketseat
 
 Gympoint é um gerenciador de academia.
 
-Onde os Funcionários cadastrão os alunos, porém os alunos não se
+Onde os Funcionários cadastram os alunos, porém os alunos não se
 autenticam na plataforma.
 
 #Contém
