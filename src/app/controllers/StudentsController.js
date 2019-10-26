@@ -61,15 +61,15 @@ class StudentsController {
       return res.status(400).json({ error: 'Validation fails' });
     }
 
-    const { id } = req.body;
+    const { email } = req.body;
 
-    const student = await Students.findOne({ where: { id } });
+    const student = await Students.findOne({ where: { email } });
 
     if (!student) {
       return res.status(400).json({ error: 'Student does not exists.' });
     }
 
-    const { email, name, age, weight, height } = await student.update(req.body);
+    const { id, name, age, weight, height } = await student.update(req.body);
 
     return res.json({
       id,
