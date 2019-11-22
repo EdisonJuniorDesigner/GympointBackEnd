@@ -8,9 +8,11 @@ import StudentsController from './app/controllers/StudentsController';
 import SessionController from './app/controllers/SessionController';
 import PlanController from './app/controllers/PlanController';
 import EnrollmentController from './app/controllers/EnrollmentController';
+import CheckinsController from './app/controllers/CheckinsController';
 
 import authMiddleware from './app/middlewares/auth';
 import checkPlanMiddleware from './app/middlewares/checkPlan';
+import checkStudentMiddleware from './app/middlewares/checkStudents';
 import checkEnrollmentMiddleware from './app/middlewares/checkEnrollment';
 import checkEnrollmentPlanMiddleware from './app/middlewares/checkEnrollmentPlans';
 import checkEnrollmentStudentMiddleware from './app/middlewares/checkEnrollmentStudents';
@@ -20,6 +22,17 @@ const upload = multer(multerConfig);
 
 routes.post('/users', UserController.store);
 routes.post('/sessions', SessionController.store);
+
+routes.get(
+  '/students/:id/checkins',
+  checkStudentMiddleware,
+  CheckinsController.index
+);
+routes.post(
+  '/students/:id/checkins',
+  checkStudentMiddleware,
+  CheckinsController.store
+);
 
 routes.use(authMiddleware);
 

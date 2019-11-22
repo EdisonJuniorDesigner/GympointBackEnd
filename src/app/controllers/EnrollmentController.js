@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
-import { addMonths, parseISO } from 'date-fns';
+import { addMonths, parseISO, format } from 'date-fns';
+import pt from 'date-fns/locale/pt';
 
 import Enrollment from '../models/Enrollment';
 import Student from '../models/Students';
@@ -66,6 +67,36 @@ class EnrollmentController {
       start_date,
       end_date,
       price,
+    });
+
+    const student = await Student.findOne({
+      where: { id: student_id },
+    });
+
+    await Mail.sendMail({
+      to: `${student.name} <${student.email}>`,
+      subject: 'Matrícula realizada',
+      template: 'creation',
+      context: {
+        student: student.name,
+        start_date: format(
+          enrollment.start_date,
+          "'dia' dd 'de' MMMM', ás' H:mm'h'",
+          {
+            locale: pt,
+          }
+        ),
+        title: plan.title,
+        duration: plan.duration,
+        price: enrollment.price,
+        end_date: format(
+          enrollment.end_date,
+          "'dia' dd 'de' MMMM', ás' H:mm'h'",
+          {
+            locale: pt,
+          }
+        ),
+      },
     });
 
     return res.json(enrollment);
