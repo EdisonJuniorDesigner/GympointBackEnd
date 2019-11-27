@@ -1,9 +1,8 @@
-import { format } from 'date-fns';
-import pt from 'date-fns/locale/pt';
 import HelpOrders from '../models/HelpOrders';
 import Students from '../models/Students';
 
-import Mail from '../../lib/Mail';
+import HelpOrderMail from '../jobs/HelpOrderMail';
+import Queue from '../../lib/Queue';
 
 class HelpOrdersController {
   async index(req, res) {
@@ -68,22 +67,9 @@ class HelpOrdersController {
       answer_at: new Date(),
     });
 
-    await Mail.sendMail({
-      to: `${student.name} <${student.email}>`,
-      subject: 'Resposta a pedido de Auxilio',
-      template: 'help-order',
-      context: {
-        student: student.name,
-        date: format(
-          help_order.created_at,
-          "'dia' dd 'de' MMMM', ás' H:mm'h'",
-          {
-            locale: pt,
-          }
-        ),
-        question: help_order.question,
-        answer: help_order.answer,
-      },
+    await Queue.add(HelpOrderMail.key, {
+      help_order,
+      student,
     });
 
     return res.json(help_order);

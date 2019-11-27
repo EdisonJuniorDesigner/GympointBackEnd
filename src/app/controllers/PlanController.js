@@ -6,7 +6,7 @@ class PlanController {
   async index(req, res) {
     const { page = 1, quantity = 20 } = req.query;
 
-    const plans = await Plan.findAll({
+    const plans = await Plan.finddAll({
       limit: quantity,
       offset: (page - 1) * quantity,
       order: ['price'],

@@ -1,12 +1,13 @@
 import * as Yup from 'yup';
-import { addMonths, parseISO, format } from 'date-fns';
-import pt from 'date-fns/locale/pt';
+import { addMonths, parseISO } from 'date-fns';
 
 import Enrollment from '../models/Enrollment';
 import Student from '../models/Students';
 import Plan from '../models/Plan';
 
-import Mail from '../../lib/Mail';
+import CancellationMail from '../jobs/CancellationMail';
+import CreationMail from '../jobs/CreationMail';
+import Queue from '../../lib/Queue';
 
 class EnrollmentController {
   async index(req, res) {
@@ -73,30 +74,10 @@ class EnrollmentController {
       where: { id: student_id },
     });
 
-    await Mail.sendMail({
-      to: `${student.name} <${student.email}>`,
-      subject: 'Matrícula realizada',
-      template: 'creation',
-      context: {
-        student: student.name,
-        start_date: format(
-          enrollment.start_date,
-          "'dia' dd 'de' MMMM', ás' H:mm'h'",
-          {
-            locale: pt,
-          }
-        ),
-        title: plan.title,
-        duration: plan.duration,
-        price: enrollment.price,
-        end_date: format(
-          enrollment.end_date,
-          "'dia' dd 'de' MMMM', ás' H:mm'h'",
-          {
-            locale: pt,
-          }
-        ),
-      },
+    await Queue.add(CreationMail.key, {
+      enrollment,
+      student,
+      plan,
     });
 
     return res.json(enrollment);
@@ -177,16 +158,8 @@ class EnrollmentController {
 
     await Enrollment.destroy({ where: { id } });
 
-    await Mail.sendMail({
-      to: `${enrollment.student.name} <${enrollment.student.email}>`,
-      subject: 'Matrícula cancelada',
-      template: 'cancellation',
-      context: {
-        student: enrollment.student.name,
-        title: enrollment.plan.title,
-        duration: enrollment.plan.duration,
-        price: enrollment.plan.price,
-      },
+    await Queue.add(CancellationMail.key, {
+      enrollment,
     });
 
     return res.json(enrollment);
